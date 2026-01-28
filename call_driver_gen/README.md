@@ -1,4 +1,4 @@
-# 📘 Insurance Acquisition Call Driver Generator
+# 📘 Call Driver Generator
 
 This project uses **Azure OpenAI (GPT-4o)** to analyze customer communications related to an **insurance company acquisition** and automatically generate:
 
