@@ -75,3 +75,12 @@ Theme
        └── Agent Response Variants (clustered)
 
 
+    For each agent:
+
+What themes did they receive calls about?
+
+What questions did they handle under each theme?
+
+How did they respond, and how often?
+
+Where does their response pattern differ from peers?
