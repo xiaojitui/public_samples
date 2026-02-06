@@ -49,3 +49,105 @@ def build_agent_stats(
         agent_stats[agent][theme][canonical_q][response] += 1
 
     return agent_stats
+
+
+
+def summarize_agent(agent_id, agent_data):
+    llm = LLMClient()
+
+    prompt = f"""
+You are analyzing call-handling behavior for an insurance call center agent.
+
+Agent ID: {agent_id}
+
+Data:
+{json.dumps(agent_data, indent=2)}
+
+Provide:
+1) Main themes this agent handled
+2) Common questions they received
+3) Notable response patterns or differences
+4) One coaching suggestion (if any)
+
+Be concise and factual.
+"""
+
+    return llm.chat([
+        {"role": "system", "content": "You analyze agent performance."},
+        {"role": "user", "content": prompt}
+    ])
+
+
+def generate_agent_reports(
+    all_qa,
+    clustered_questions,
+    themes,
+    clustered_responses,
+    generate_llm_summary=False
+):
+    agent_stats = build_agent_stats(
+        all_qa,
+        clustered_questions,
+        themes,
+        clustered_responses
+    )
+
+    reports = {}
+
+    for agent_id, data in agent_stats.items():
+        report = {
+            "agent_id": agent_id,
+            "themes": []
+        }
+
+        for theme, questions in data.items():
+            theme_block = {
+                "theme": theme,
+                "questions": []
+            }
+
+            for q, responses in questions.items():
+                theme_block["questions"].append({
+                    "question": q,
+                    "responses": [
+                        {"response": r, "count": c}
+                        for r, c in responses.items()
+                    ]
+                })
+
+            report["themes"].append(theme_block)
+
+        if generate_llm_summary:
+            report["summary"] = summarize_agent(agent_id, report["themes"])
+
+        reports[agent_id] = report
+
+    return reports
+
+
+'''
+{
+  "agent_id": "ABC1234",
+  "themes": [
+    {
+      "theme": "Billing & Payments",
+      "questions": [
+        {
+          "question": "How do I pay my insurance bill?",
+          "responses": [
+            {
+              "response": "You can pay online through the customer portal.",
+              "count": 12
+            },
+            {
+              "response": "Payments can be made by phone or online.",
+              "count": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": "This agent primarily handled billing inquiries and consistently directed customers to the online portal..."
+}
+'''
