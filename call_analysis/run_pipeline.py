@@ -47,7 +47,12 @@ def aggregate_responses_by_canonical_question(all_qa, clustered_questions):
 
     return response_buckets
 
+response_buckets = aggregate_responses_by_canonical_question(
+    all_qa,
+    clustered_questions
+)
+
 clustered_responses = {
-    canonical_q: cluster_responses(responses)
-    for canonical_q, responses in response_buckets.items()
+    q: cluster_responses(resps)
+    for q, resps in response_buckets.items()
 }
