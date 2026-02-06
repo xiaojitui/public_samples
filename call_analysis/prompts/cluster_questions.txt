@@ -16,3 +16,14 @@ Format:
 
 Questions:
 {questions}
+
+
+'''
+For each cluster include:
+- canonical_question
+- variants
+- count
+- confidence
+- reasoning
+
+'''
