@@ -14,3 +14,12 @@ Format:
 
 Responses:
 {responses}
+
+
+'''
+For each response cluster include:
+- response
+- count
+- confidence
+- reasoning
+'''
