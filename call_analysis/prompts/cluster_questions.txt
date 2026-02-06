@@ -1,0 +1,18 @@
+You are given a list of user questions from insurance calls.
+
+Group semantically similar questions together.
+Create a canonical question for each group.
+
+Return JSON only.
+
+Format:
+[
+  {
+    "canonical_question": "...",
+    "variants": [...],
+    "count": <int>
+  }
+]
+
+Questions:
+{questions}
