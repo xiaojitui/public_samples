@@ -1,0 +1,16 @@
+You are given multiple agent responses to the same customer question.
+
+Group similar responses together and count them.
+
+Return JSON only.
+
+Format:
+[
+  {
+    "response": "...",
+    "count": <int>
+  }
+]
+
+Responses:
+{responses}
