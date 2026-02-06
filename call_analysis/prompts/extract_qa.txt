@@ -1,0 +1,18 @@
+You are analyzing insurance call transcripts.
+
+From the conversation below:
+- Extract all USER QUESTIONS (normalize wording).
+- For each question, extract the AGENT RESPONSE that answers it.
+- Ignore greetings, silence, or system messages.
+- Output JSON only.
+
+Output format:
+[
+  {
+    "question": "<canonical user question>",
+    "agent_response": "<canonical agent response>"
+  }
+]
+
+Conversation:
+{conversation}
