@@ -84,3 +84,19 @@ What questions did they handle under each theme?
 How did they respond, and how often?
 
 Where does their response pattern differ from peers?
+
+
+
+
+Layer 1: Semantic schema (slow-changing)
+  - Themes
+  - Canonical questions
+  - Canonical responses
+
+Layer 2: Facts (append-only)
+  - (transcript_id, agent_id, canonical_question, canonical_response)
+
+Layer 3: Aggregates (recomputable)
+  - final_report
+  - agent_report
+
