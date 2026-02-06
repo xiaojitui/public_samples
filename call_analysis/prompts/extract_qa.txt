@@ -16,3 +16,23 @@ Output format:
 
 Conversation:
 {conversation}
+
+'''
+Output JSON only.
+
+Each item must include:
+- question
+- agent_response
+- confidence (0–1)
+- reasoning (1 sentence)
+
+Format:
+[
+  {
+    "question": "...",
+    "agent_response": "...",
+    "confidence": 0.93,
+    "reasoning": "The user explicitly asked about billing and the agent answered with payment instructions."
+  }
+]
+'''
