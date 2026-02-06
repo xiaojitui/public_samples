@@ -100,3 +100,65 @@ Layer 3: Aggregates (recomputable)
   - final_report
   - agent_report
 
+
+
+What should happen when NEW transcripts arrive?
+Step 1 — Run ONLY the cheap extraction on new data
+
+For new transcripts only:
+
+Extract Q/A pairs
+
+Keep agent_id, transcript_id
+
+Add confidence + reasoning (as before)
+
+No clustering yet.
+
+Step 2 — Map new questions to EXISTING canonical questions
+
+For each new question:
+
+Semantic match against existing canonical questions
+
+If similarity ≥ threshold → assign
+
+Else → mark as unmapped
+
+This is a retrieval problem, not a clustering problem.
+
+✅ Fast
+✅ Stable
+✅ Deterministic
+
+Step 3 — Map agent responses to canonical responses
+
+Same logic:
+
+Match against existing canonical responses per question
+
+Add new variant only if confidence is low
+
+Step 4 — Update aggregates (no LLM needed)
+
+Now update:
+
+final_report counts
+
+agent_report counts
+
+Pure Python.
+
+When do you EVER rerun clustering?
+
+Only when semantic drift exceeds tolerance.
+
+Examples:
+
+10–15% of new questions are unmapped
+
+A theme grows too large or incoherent
+
+Business introduces new policy/products
+
+This is a controlled re-index, not a daily job.
