@@ -52,7 +52,28 @@ response_buckets = aggregate_responses_by_canonical_question(
     clustered_questions
 )
 
+
 clustered_responses = {
     q: cluster_responses(resps)
     for q, resps in response_buckets.items()
 }
+
+
+'''
+{
+  "theme": "Billing & Payments",
+  "questions": [
+    {
+      "question": "How do I pay my insurance bill?",
+      "count": 42,
+      "responses": [
+        {
+          "response": "You can pay online through the customer portal.",
+          "count": 31,
+          "confidence": 0.96
+        }
+      ]
+    }
+  ]
+}
+'''
