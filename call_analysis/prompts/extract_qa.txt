@@ -36,3 +36,12 @@ Format:
   }
 ]
 '''
+
+'''
+{
+  "agent_id": "ABC1234",
+  "question": "How do I pay my insurance bill?",
+  "agent_response": "You can pay online through the portal.",
+  "confidence": 0.93
+}
+'''
