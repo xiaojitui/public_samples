@@ -21,3 +21,13 @@ Format:
 
 Questions:
 {questions_json}
+
+
+'''
+For each theme include:
+- theme
+- questions (with counts)
+- theme_count
+- confidence
+- reasoning
+'''
