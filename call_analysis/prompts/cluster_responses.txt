@@ -23,3 +23,25 @@ For each response cluster include:
 - confidence
 - reasoning
 '''
+
+
+'''
+You are given multiple agent responses to the SAME customer question.
+
+Group semantically similar responses together.
+
+Return JSON only.
+
+Format:
+[
+  {
+    "response": "<canonical response>",
+    "count": <int>,
+    "confidence": <float>,
+    "reasoning": "<why these responses are grouped>"
+  }
+]
+
+Responses:
+{responses}
+'''
