@@ -1,0 +1,23 @@
+You are analyzing insurance customer questions.
+
+Create a SHORT list of high-level themes (5–10 max).
+Assign each question to exactly one theme.
+
+Return JSON only.
+
+Format:
+[
+  {
+    "theme": "...",
+    "questions": [
+      {
+        "question": "...",
+        "count": <int>
+      }
+    ],
+    "theme_count": <int>
+  }
+]
+
+Questions:
+{questions_json}
