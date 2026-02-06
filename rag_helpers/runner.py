@@ -19,57 +19,76 @@ def cosine_distance(a: np.ndarray, b: np.ndarray) -> float:
 
 
 
-import ast
-
-def parse_sparse_string(s: str):
-    """
-    Parses '{1: 0.1, 2: 0.2}/995300'
-    Returns: (dict, dimension)
-    """
+import numpy as np
+from scipy.sparse import csr_matrix
+def parse_sparse_string_fast(s: str):
     sparse_part, dim_part = s.split("/")
-    sparse_dict = ast.literal_eval(sparse_part)
-    dimension = int(dim_part)
-    return sparse_dict, dimension
+    dim = int(dim_part)
 
-def sparse_dot(q: dict, d: dict) -> float:
-    """
-    Efficient sparse dot product
-    """
-    # iterate over smaller dict
-    if len(q) > len(d):
-        q, d = d, q
-    return sum(v * d.get(k, 0.0) for k, v in q.items())
+    # remove braces
+    body = sparse_part.strip("{}").strip()
+    if not body:
+        return {}, dim
 
-def lexical_retrieval(
+    items = body.split(",")
+    d = {}
+    for item in items:
+        k, v = item.split(":")
+        d[int(k)] = float(v)
+
+    return d, dim
+
+def build_sparse_matrix(sparse_strings: pd.Series):
+    rows = []
+    cols = []
+    data = []
+
+    dim = None
+
+    for row_idx, s in enumerate(sparse_strings):
+        d, this_dim = parse_sparse_string_fast(s)
+
+        if dim is None:
+            dim = this_dim
+        elif dim != this_dim:
+            raise ValueError("Sparse dimension mismatch")
+
+        for k, v in d.items():
+            rows.append(row_idx)
+            cols.append(k)
+            data.append(v)
+
+    mat = csr_matrix((data, (rows, cols)), shape=(len(sparse_strings), dim))
+    return mat
+
+def query_to_sparse_vector(query_sparse_str: str):
+    d, dim = parse_sparse_string_fast(query_sparse_str)
+
+    cols = list(d.keys())
+    data = list(d.values())
+
+    return csr_matrix((data, ([0] * len(cols), cols)), shape=(1, dim))
+
+def lexical_retrieval_fast(
     df: pd.DataFrame,
+    doc_sparse_matrix: csr_matrix,
     query_sparse_str: str,
     top_k: int
 ) -> pd.DataFrame:
 
-    query_sparse, query_dim = parse_sparse_string(query_sparse_str)
+    query_vec = query_to_sparse_vector(query_sparse_str)
 
-    scores = []
+    # pgvector <#> == negative inner product
+    # result shape: (N, 1)
+    scores = -(doc_sparse_matrix @ query_vec.T).toarray().ravel()
 
-    for _, row in df.iterrows():
-        doc_sparse_str = row["sparse_embedding"]
-        doc_sparse, doc_dim = parse_sparse_string(doc_sparse_str)
+    lexical_scores = scores - 1  # EXACT SQL match
 
-        if doc_dim != query_dim:
-            raise ValueError("Sparse dimension mismatch")
+    idx = np.argsort(lexical_scores)[:top_k]
 
-        # pgvector <#> == negative inner product
-        lexical_distance = -sparse_dot(query_sparse, doc_sparse)
-
-        # EXACT SQL match
-        lexical_score = lexical_distance - 1
-
-        scores.append(lexical_score)
-
-    df_out = df.copy()
-    df_out["lexical_score"] = scores
+    df_out = df.iloc[idx].copy()
+    df_out["lexical_score"] = lexical_scores[idx]
     df_out["cosine_similarity"] = None
-
-    df_out = df_out.sort_values("lexical_score").head(top_k)
 
     return df_out[
         [
@@ -81,6 +100,80 @@ def lexical_retrieval(
             "metadata",
         ]
     ]
+
+# one-time cost
+doc_sparse_matrix = build_sparse_matrix(df["sparse_embedding"])
+
+# per query
+results = lexical_retrieval_fast(
+    df,
+    doc_sparse_matrix,
+    query_sparse_str,
+    top_k=20
+)
+
+# import ast
+
+# def parse_sparse_string(s: str):
+#     """
+#     Parses '{1: 0.1, 2: 0.2}/995300'
+#     Returns: (dict, dimension)
+#     """
+#     sparse_part, dim_part = s.split("/")
+#     sparse_dict = ast.literal_eval(sparse_part)
+#     dimension = int(dim_part)
+#     return sparse_dict, dimension
+
+# def sparse_dot(q: dict, d: dict) -> float:
+#     """
+#     Efficient sparse dot product
+#     """
+#     # iterate over smaller dict
+#     if len(q) > len(d):
+#         q, d = d, q
+#     return sum(v * d.get(k, 0.0) for k, v in q.items())
+
+# def lexical_retrieval(
+#     df: pd.DataFrame,
+#     query_sparse_str: str,
+#     top_k: int
+# ) -> pd.DataFrame:
+
+#     query_sparse, query_dim = parse_sparse_string(query_sparse_str)
+
+#     scores = []
+
+#     for _, row in df.iterrows():
+#         doc_sparse_str = row["sparse_embedding"]
+#         doc_sparse, doc_dim = parse_sparse_string(doc_sparse_str)
+
+#         if doc_dim != query_dim:
+#             raise ValueError("Sparse dimension mismatch")
+
+#         # pgvector <#> == negative inner product
+#         lexical_distance = -sparse_dot(query_sparse, doc_sparse)
+
+#         # EXACT SQL match
+#         lexical_score = lexical_distance - 1
+
+#         scores.append(lexical_score)
+
+#     df_out = df.copy()
+#     df_out["lexical_score"] = scores
+#     df_out["cosine_similarity"] = None
+
+#     df_out = df_out.sort_values("lexical_score").head(top_k)
+
+#     return df_out[
+#         [
+#             "embedding_id",
+#             "article_id",
+#             "document",
+#             "lexical_score",
+#             "cosine_similarity",
+#             "metadata",
+#         ]
+#     ]
 
 
 # def lexical_retrieval(
