@@ -162,3 +162,19 @@ A theme grows too large or incoherent
 Business introduces new policy/products
 
 This is a controlled re-index, not a daily job.
+
+
+
+
+We will:
+
+Add LLM-based resolution classification
+
+Add field resolve_question
+
+Compute:
+    question_resolved_score =
+  sum(resolve_question * response_count) / total_response_count
+
+(Weighted by counts — this is important and correct statistically.)
+
