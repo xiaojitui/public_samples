@@ -151,3 +151,43 @@ def generate_agent_reports(
   "summary": "This agent primarily handled billing inquiries and consistently directed customers to the online portal..."
 }
 '''
+
+from prompts.resolution_prompt import RESOLUTION_CHECK_PROMPT
+
+def evaluate_agent_resolution(llm_client, agent_report):
+
+    for theme in agent_report["themes"]:
+
+        for q in theme["questions"]:
+
+            total_count = 0
+            resolved_weighted = 0
+
+            for r in q["responses"]:
+
+                prompt = RESOLUTION_CHECK_PROMPT.format(
+                    question=q["question"],
+                    response=r["response"]
+                )
+
+                result = llm_client.chat_json(prompt)
+
+                r["resolve_question"] = result["resolve_question"]
+                r["resolution_confidence"] = result["confidence"]
+                r["resolution_reasoning"] = result["reasoning"]
+
+                count = r["count"]
+                total_count += count
+
+                if r["resolve_question"] == 1:
+                    resolved_weighted += count
+
+            if total_count > 0:
+                q["question_resolved_score"] = resolved_weighted / total_count
+            else:
+                q["question_resolved_score"] = 0.0
+
+    return agent_report
+
+# agent_report = evaluate_agent_resolution(llm_client, agent_report)
+
