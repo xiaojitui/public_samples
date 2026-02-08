@@ -4,6 +4,8 @@ from steps.step2_cluster_questions import cluster_questions
 from steps.step3_generate_themes import generate_themes
 from steps.step4_cluster_responses import cluster_responses
 
+from prompts.resolution_prompt import RESOLUTION_CHECK_PROMPT
+
 df = pd.read_csv("data/transcripts.csv")
 
 all_qa = []
@@ -71,6 +73,72 @@ clustered_responses = {
           "response": "You can pay online through the customer portal.",
           "count": 31,
           "confidence": 0.96
+        }
+      ]
+    }
+  ]
+}
+'''
+
+def evaluate_response_resolution(llm_client, final_report):
+
+    for theme in final_report:
+
+        for q in theme["questions"]:
+
+            question_text = q["question"]
+
+            total_count = 0
+            resolved_weighted = 0
+
+            for r in q["responses"]:
+
+                prompt = RESOLUTION_CHECK_PROMPT.format(
+                    question=question_text,
+                    response=r["response"]
+                )
+
+                result = llm_client.chat_json(prompt)
+
+                r["resolve_question"] = result["resolve_question"]
+                r["resolution_confidence"] = result["confidence"]
+                r["resolution_reasoning"] = result["reasoning"]
+
+                count = r["count"]
+                total_count += count
+
+                if r["resolve_question"] == 1:
+                    resolved_weighted += count
+
+            if total_count > 0:
+                q["question_resolved_score"] = resolved_weighted / total_count
+            else:
+                q["question_resolved_score"] = 0.0
+
+    return final_report
+
+
+'''
+final_report = build_final_report(...)
+final_report = evaluate_response_resolution(llm_client, final_report)
+'''
+
+'''
+{
+  "theme": "Billing & Payments",
+  "questions": [
+    {
+      "question": "How do I pay my insurance bill?",
+      "count": 42,
+      "question_resolved_score": 0.86,
+      "responses": [
+        {
+          "response": "You can pay online through the customer portal.",
+          "count": 31,
+          "confidence": 0.96,
+          "resolve_question": 1,
+          "resolution_confidence": 0.94,
+          "resolution_reasoning": "Directly provides payment method"
         }
       ]
     }
