@@ -117,15 +117,38 @@ def evaluate_response_resolution(llm_client, final_report):
 
     return final_report
 
+def compute_theme_resolved_scores(final_report):
+
+    for theme in final_report:
+
+        total_q_count = 0
+        weighted_resolved = 0
+
+        for q in theme["questions"]:
+            q_count = q.get("count", 0)
+            q_score = q.get("question_resolved_score", 0.0)
+
+            total_q_count += q_count
+            weighted_resolved += q_count * q_score
+
+        if total_q_count > 0:
+            theme["theme_resolved_score"] = weighted_resolved / total_q_count
+        else:
+            theme["theme_resolved_score"] = 0.0
+
+    return final_report
+
 
 '''
 final_report = build_final_report(...)
 final_report = evaluate_response_resolution(llm_client, final_report)
+final_report = compute_theme_resolved_scores(final_report)
 '''
 
 '''
 {
   "theme": "Billing & Payments",
+  "theme_resolved_score": 0.83,
   "questions": [
     {
       "question": "How do I pay my insurance bill?",
