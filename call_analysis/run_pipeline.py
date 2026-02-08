@@ -168,3 +168,28 @@ final_report = compute_theme_resolved_scores(final_report)
   ]
 }
 '''
+
+from save_per_call import build_per_call_analysis, save_per_call_analysis
+
+per_call_data = build_per_call_analysis(transcripts, clustered_qs)
+
+save_per_call_analysis(per_call_data)
+
+import json
+
+calls = json.load(open("outputs/per_call_analysis.json"))
+
+for c in calls:
+    scores = [q["question_resolved_score"] for q in c["questions"]]
+    c["call_resolution_score"] = sum(scores)/len(scores) if scores else 1
+
+sorted(calls, key=lambda x: x["call_resolution_score"])[0:20]
+
+import pandas as pd
+
+pd.json_normalize(per_call_data, record_path="questions",
+                  meta=["call_id","agent_id"]).to_parquet("outputs/per_call_analysis.parquet")
+
+
+
+
