@@ -189,5 +189,28 @@ def evaluate_agent_resolution(llm_client, agent_report):
 
     return agent_report
 
+def compute_agent_theme_resolved_scores(agent_report):
+
+    for theme in agent_report["themes"]:
+
+        total_q_count = 0
+        weighted_resolved = 0
+
+        for q in theme["questions"]:
+
+            q_count = sum(r["count"] for r in q["responses"])
+            q_score = q.get("question_resolved_score", 0.0)
+
+            total_q_count += q_count
+            weighted_resolved += q_count * q_score
+
+        if total_q_count > 0:
+            theme["theme_resolved_score"] = weighted_resolved / total_q_count
+        else:
+            theme["theme_resolved_score"] = 0.0
+
+    return agent_report
+
 # agent_report = evaluate_agent_resolution(llm_client, agent_report)
+# agent_report = compute_agent_theme_resolved_scores(agent_report)
 
