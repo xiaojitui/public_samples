@@ -178,3 +178,26 @@ Compute:
 
 (Weighted by counts — this is important and correct statistically.)
 
+
+##
+low_perf_questions = {
+    q["question"]
+    for theme in final_report
+    for q in theme["questions"]
+    if q["question_resolved_score"] < 0.5
+}
+bad_calls = []
+
+for call in call_reports:
+    for q in call["questions"]:
+        if q["question"] in low_perf_questions:
+            bad_calls.append(call)
+            break
+##
+low_agents = [
+    r["agent_id"]
+    for r in agent_reports
+    if r["overall_resolution_score"] < 0.6
+]
+##
+
